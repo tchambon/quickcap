@@ -20,7 +20,7 @@ caprover_password =os.environ.get("CAPROVER_PASSWORD")
 token = caplogin(caprover_server, caprover_password)
 ```
 
-### Create a webcam app
+### Create a webapp
 
 First, create your app in a Python file:
 
