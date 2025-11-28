@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "quickcap"
+  site-url: "https://tchambon.github.io/quickcap"
+  description: "Simple lib to deploy app using caprover"
+  repo-branch: main
+  repo-url: "https://github.com/tchambon/quickcap"
