@@ -91,7 +91,13 @@ def setup_app(
 
 
 # %% ../nbs/00_core.ipynb 9
-def upload_app(server_url, token, app_name, tar_buffer):
+def upload_app(
+    server_url:str,  # CapRover server URL
+    token:str,  # Authentication token from caplogin
+    app_name:str,  # Name of the app to deploy to
+    tar_buffer:io.BytesIO  # In-memory tar.gz file containing deployment files
+) -> dict:  # API response
+    "Upload and deploy a tar.gz archive to an existing app"
     headers = {"x-captain-auth": token}
     tar_buffer.seek(0)
     files = {"sourceFile": ("deploy.tar.gz", tar_buffer, "application/gzip")}
@@ -100,8 +106,14 @@ def upload_app(server_url, token, app_name, tar_buffer):
     if response.json()['status'] != 100: raise Exception(f'API Error: {response.json()}')
     return response.json()
 
-
-def deploy(server_url, token, app_name, script_paths, requirements=None):
+def deploy(
+    server_url:str,  # CapRover server URL
+    token:str,  # Authentication token from caplogin
+    app_name:str,  # Name of the app to deploy to
+    script_paths:str|list,  # Path(s) to Python script(s). First script is the entry point
+    requirements:list=None  # List of pip requirements. Defaults to ["python-fasthtml"]
+) -> dict:  # API response
+    "Build and deploy a FastHTML app from Python script(s)"
     if isinstance(script_paths, str): script_paths = [script_paths]
     if requirements is None: requirements = ["python-fasthtml"]
     main_script = Path(script_paths[0]).name
@@ -123,14 +135,25 @@ def deploy(server_url, token, app_name, script_paths, requirements=None):
     return upload_app(server_url, token, app_name, tar_buffer)
 
 # %% ../nbs/00_core.ipynb 11
-def get_app_logs(server_url, token, app_name, encoding='ascii'):
+def get_app_logs(
+    server_url:str,  # CapRover server URL
+    token:str,  # Authentication token from caplogin
+    app_name:str,  # Name of the app
+    encoding:str='ascii'  # Log encoding
+) -> str:  # Runtime logs
+    "Get runtime logs from a running app"
     headers = {"x-captain-auth": token}
     response = httpx.get(f"{server_url}api/v2/user/apps/appData/{app_name}/logs", headers=headers, params={"encoding": encoding}, timeout=30)
     if response.status_code != 200: raise Exception(f'HTTP Error: {response}')
     if response.json()['status'] != 100: raise Exception(f'API Error: {response.json()}')
     return response.json()['data']['logs']
 
-def get_app_deployment_logs(server_url, token, app_name):
+def get_app_deployment_logs(
+    server_url:str,  # CapRover server URL
+    token:str,  # Authentication token from caplogin
+    app_name:str  # Name of the app
+) -> str:  # Build/deployment logs
+    "Get build and deployment logs from an app"
     headers = {"x-captain-auth": token}
     response = httpx.get(f"{server_url}api/v2/user/apps/appData/{app_name}", headers=headers, timeout=30)
     if response.status_code != 200: raise Exception(f'HTTP Error: {response}')
@@ -138,7 +161,12 @@ def get_app_deployment_logs(server_url, token, app_name):
     return '\n'.join(response.json()['data']['logs']['lines'])
 
 # %% ../nbs/00_core.ipynb 13
-def delete_app(server_url, token, app_name):
+def delete_app(
+    server_url:str,  # CapRover server URL
+    token:str,  # Authentication token from caplogin
+    app_name:str  # Name of the app to delete
+) -> dict:  # API response
+    "Delete an app from CapRover"
     headers = {"x-captain-auth": token}
     body = {"appName": app_name}
     response = httpx.post(f"{server_url}api/v2/user/apps/appDefinitions/delete", json=body, headers=headers)
